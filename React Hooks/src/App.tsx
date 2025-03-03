@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import { Memo, Callback, Context, Reducer, Ref, Layout, MemoAPI } from "./Hooks";
+import { Memo, Callback, Context, Reducer, Ref, Layout, ActionState, Optimistic } from "./Hooks";
 import { Home, Navigation } from "./Components";
 
 const App = () => {
@@ -18,7 +18,8 @@ const App = () => {
           <Route path="/reducer" element={<Reducer />} />
           <Route path="/ref" element={<Ref />} />
           <Route path="/layout" element={<Layout />} />
-          <Route path="/memo-api" element={<MemoAPI />} />
+          <Route path="/action" element={<ActionState />} />
+          <Route path="/useOptimistic" element={<Optimistic />} />
         </Routes>
       </div>
     </div>

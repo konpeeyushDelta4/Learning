@@ -45,6 +45,18 @@ const Home: React.FC = () => {
       path: '/layout',
       description: 'Similar to useEffect, but fires before the browser paints',
       emoji: '🎨'
+    },
+    {
+      name:'useActionState',
+      path:'/useActionState',
+      description:'Manage async actions with loading, error, and data states',
+      emoji:'⚡'
+    },
+    {
+      name:'useOptimistic',
+      path:'/useOptimistic',
+      description:'Optimistically update UI before async actions complete',
+      emoji:'🚀'
     }
   ];
 
