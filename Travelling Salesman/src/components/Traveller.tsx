@@ -35,6 +35,7 @@ const Traveller: React.FC = () => {
     const [solution, setSolution] = useState<number[] | null>(null);
     const [solutionDistance, setSolutionDistance] = useState<number>(0);
     const [isCalculating, setIsCalculating] = useState(false);
+    const [pathError, setPathError] = useState<string | null>(null);
 
     // Refs
     const canvasRef = useRef<HTMLDivElement>(null);
@@ -164,6 +165,7 @@ const Traveller: React.FC = () => {
         setConnectingFromId(null);
         setCityIdCounter(1);
         setSolution(null);
+        setPathError(null);
     };
 
     // Find the shortest path using a simple algorithm
@@ -171,6 +173,7 @@ const Traveller: React.FC = () => {
         if (cities.length < 3) return;
 
         setIsCalculating(true);
+        setPathError(null); // Reset any previous errors
 
         // Simple timeout to simulate calculation
         setTimeout(() => {
@@ -182,6 +185,8 @@ const Traveller: React.FC = () => {
             } catch (error) {
                 console.error("Failed to find solution:", error);
                 setSolution(null);
+                // Set the error message
+                setPathError((error as Error).message);
             } finally {
                 setIsCalculating(false);
             }
@@ -309,6 +314,7 @@ const Traveller: React.FC = () => {
     // Reset solution when cities or connections change
     useEffect(() => {
         setSolution(null);
+        setPathError(null);
     }, [cities, connections]);
 
     return (
@@ -624,6 +630,19 @@ const Traveller: React.FC = () => {
                         </p>
                         <p className="text-sm mt-1">
                             <span className="font-bold">Total Distance:</span> {solutionDistance.toFixed(1)}
+                        </p>
+                    </div>
+                )}
+
+                {/* Error display */}
+                {pathError && (
+                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded">
+                        <h3 className="font-bold text-red-800 mb-2">Cannot Find Solution</h3>
+                        <p className="text-sm text-red-700">
+                            <span className="font-bold">Error:</span> {pathError}
+                        </p>
+                        <p className="text-sm mt-2 text-red-600">
+                            Make sure all cities are connected with valid distances to form a complete route.
                         </p>
                     </div>
                 )}
