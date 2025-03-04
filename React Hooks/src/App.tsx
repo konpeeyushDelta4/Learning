@@ -18,7 +18,7 @@ const App = () => {
           <Route path="/reducer" element={<Reducer />} />
           <Route path="/ref" element={<Ref />} />
           <Route path="/layout" element={<Layout />} />
-          <Route path="/action" element={<ActionState />} />
+          <Route path="/useActionState" element={<ActionState />} />
           <Route path="/useOptimistic" element={<Optimistic />} />
         </Routes>
       </div>
