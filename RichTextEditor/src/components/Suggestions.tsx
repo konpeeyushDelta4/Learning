@@ -51,7 +51,7 @@ const Suggestions: React.FC<SuggestionsProps> = ({
                                 <li
                                     key={suggestion.id}
                                     id={`suggestion-item-${itemIndex}`}
-                                    className={`suggestion-item px-4 py-3 cursor-pointer transition-colors ${isSelected ? 'selected-suggestion bg-indigo-50 border-l-3 border-indigo-500' : 'hover:bg-gray-50'
+                                    className={`suggestion-item px-4 py-3 cursor-pointer transition-colors ${isSelected ? 'bg-indigo-50 border-l-2 border-indigo-500' : 'hover:bg-gray-50'
                                         }`}
                                     onClick={() => selectSuggestion(suggestion)}
                                     onMouseEnter={() => setSelectedIndex(itemIndex)}
@@ -72,7 +72,7 @@ const Suggestions: React.FC<SuggestionsProps> = ({
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     onClick={(e) => {
-                                                        e.stopPropagation(); // Prevent triggering the parent onClick
+                                                        e.stopPropagation();
                                                     }}
                                                     className="text-blue-500 hover:text-blue-700"
                                                     title="View documentation"

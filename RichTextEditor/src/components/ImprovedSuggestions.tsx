@@ -56,50 +56,13 @@ const ImprovedSuggestions: React.FC<ImprovedSuggestionsProps> = ({
 
     }, [isVisible, position, editorRef, filteredSuggestions.length]);
 
-    // Auto-scroll to keep the selected item visible - improved version
-    useEffect(() => {
-        if (!isVisible || !listContainerRef.current) return;
-
-        // Use a small delay to ensure the DOM has updated
-        const scrollTimer = setTimeout(() => {
-            // Make sure container ref is still valid inside this callback
-            const container = listContainerRef.current;
-            if (!container) return; // Early return if null
-
-            // Find the selected item by data attribute
-            const selectedItem = container.querySelector(`.suggestion-item[data-index="${selectedIndex}"]`);
-            if (!selectedItem) return;
-
-            const containerRect = container.getBoundingClientRect();
-            const selectedRect = selectedItem.getBoundingClientRect();
-
-            // Check if selected item is outside view
-            if (selectedRect.bottom > containerRect.bottom) {
-                // Item is below the visible area - scroll down
-                container.scrollTop += (selectedRect.bottom - containerRect.bottom) + 8;
-            } else if (selectedRect.top < containerRect.top) {
-                // Item is above the visible area - scroll up
-                container.scrollTop -= (containerRect.top - selectedRect.top) + 8;
-            }
-        }, 50); // Small delay to ensure rendering has completed
-
-        return () => clearTimeout(scrollTimer);
-    }, [selectedIndex, isVisible]);
 
     if (!isVisible) return null;
 
     return ReactDOM.createPortal(
         <div
             ref={suggestionsRef}
-            className="suggestions-wrapper fixed z-[9999]"
-            style={{
-                maxWidth: 'calc(100% - 32px)',
-                filter: 'none',
-                backdropFilter: 'none',
-                WebkitBackdropFilter: 'none',
-                boxShadow: '0 12px 40px rgba(0,0,0,0.18), 0 2px 10px rgba(0,0,0,0.12)',
-                isolation: 'isolate',
-            }}
+            className="fixed z-[9999]"
         >
             <div className="bg-white rounded-lg overflow-hidden border border-gray-300 suggestions-no-blur">
                 <div className="p-3 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200">
@@ -107,7 +70,6 @@ const ImprovedSuggestions: React.FC<ImprovedSuggestionsProps> = ({
                     <p className="text-xs text-gray-500">Select a template to insert</p>
                 </div>
 
-                {/* Add ref to the scrollable container */}
                 <div
                     ref={listContainerRef}
                     className="suggestions-list-container max-h-96 overflow-y-auto"

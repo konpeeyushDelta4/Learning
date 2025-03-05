@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Quill from 'quill';
 import { defaultSuggestions } from '../../utils/constants';
 
@@ -29,11 +29,11 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
     const [searchText, setSearchText] = useState('');
     const [triggerIndex, setTriggerIndex] = useState<number | null>(null);
 
-    // Filter suggestions based on search text
-    const filteredSuggestions = defaultSuggestions.filter(suggestion =>
+    // Filter suggestions based on search text - memoized to prevent unnecessary recalculations
+    const filteredSuggestions = useMemo(() => defaultSuggestions.filter(suggestion =>
         suggestion.label.toLowerCase().includes(searchText.toLowerCase()) ||
         suggestion.description.toLowerCase().includes(searchText.toLowerCase())
-    );
+    ), [searchText]);
 
     // FIX: Define insertSuggestion first, before it's used by handleKeyDown
     const insertSuggestion = useCallback((suggestion: TemplateSuggestion) => {
@@ -85,19 +85,6 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
                 e.preventDefault();
                 e.stopPropagation();
                 setSelectedIndex(prev => Math.max(prev - 1, 0));
-                break;
-
-            // Add support for Home and End keys
-            case 'Home':
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedIndex(0); // Go to first item
-                break;
-
-            case 'End':
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedIndex(filteredSuggestions.length - 1); // Go to last item
                 break;
 
             case 'Enter':
