@@ -1,5 +1,5 @@
 {
-  "name": "editor",
+  "name": "richtexteditor",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,9 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@lexical/react": "^0.27.0",
     "@tailwindcss/vite": "^4.0.9",
-    "lexical": "^0.27.0",
+    "quill": "^2.0.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwindcss": "^4.0.9"
