@@ -1,3 +1,4 @@
+import Quill from "quill";
 interface SuggestionProps {
     id: string | number;
     label: string;
@@ -14,9 +15,31 @@ interface SuggestionsProps {
     selectSuggestion: (suggestion: SuggestionProps) => void;
 }
 
+interface TemplateSuggestion {
+    id: string | number;
+    label: string;
+    description: string;
+    category?: string;
+    type?: string;
+    link?: string;
+    value?: string;
+}
+
+interface UseRegexProps {
+    quillInstance: Quill | null;
+}
+
+interface Position {
+    top: number;
+    left: number;
+}
+
 
 
 export type {
     SuggestionProps,
-    SuggestionsProps
+    SuggestionsProps,
+    TemplateSuggestion,
+    UseRegexProps,
+    Position
 }

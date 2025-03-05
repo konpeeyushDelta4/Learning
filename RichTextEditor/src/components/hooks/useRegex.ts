@@ -1,25 +1,12 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import Quill from 'quill';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+
 import { defaultSuggestions } from '../../utils/constants';
+import { TemplateSuggestion, UseRegexProps, Position } from '../../types';
 
-// Add proper typing for suggestions
-interface TemplateSuggestion {
-    id: string | number;
-    label: string;
-    description: string;
-    category?: string;
-    type?: string;
-    link?: string;
-    value?: string;
-}
-
-interface UseRegexProps {
-    quillInstance: Quill | null;
-}
-
-interface Position {
-    top: number;
-    left: number;
+// Interface to track the last inserted template
+interface LastInsertedTemplate {
+    index: number;
+    length: number;
 }
 
 const useRegex = ({ quillInstance }: UseRegexProps) => {
@@ -29,13 +16,14 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
     const [searchText, setSearchText] = useState('');
     const [triggerIndex, setTriggerIndex] = useState<number | null>(null);
 
-    // Filter suggestions based on search text - memoized to prevent unnecessary recalculations
+    // Ref to track the last inserted template
+    const lastInsertedTemplate = useRef<LastInsertedTemplate | null>(null);
+
     const filteredSuggestions = useMemo(() => defaultSuggestions.filter(suggestion =>
         suggestion.label.toLowerCase().includes(searchText.toLowerCase()) ||
         suggestion.description.toLowerCase().includes(searchText.toLowerCase())
     ), [searchText]);
 
-    // FIX: Define insertSuggestion first, before it's used by handleKeyDown
     const insertSuggestion = useCallback((suggestion: TemplateSuggestion) => {
         if (!quillInstance || triggerIndex === null) return;
 
@@ -58,8 +46,14 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         quillInstance.formatText(triggerIndex, template.length, {
             'color': '#3b82f6',
             'background': '#dbeafe',
-            'template': suggestion.id // Custom format for tracking templates
+            'font-weight': 'bold',
         });
+
+        // Save reference to this template
+        lastInsertedTemplate.current = {
+            index: triggerIndex,
+            length: template.length
+        };
 
         // Move cursor after inserted template
         quillInstance.setSelection(triggerIndex + template.length, 0);
@@ -68,50 +62,71 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         setShowSuggestions(false);
     }, [quillInstance, triggerIndex]);
 
-    // Now define handleKeyDown which uses insertSuggestion
+    // Handler for keydown events - both for suggestions navigation AND space key detection
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        if (!showSuggestions) return;
+        // Handle space key for resetting format
+        if (e.key === ' ' && quillInstance && lastInsertedTemplate.current) {
+            const selection = quillInstance.getSelection();
+            if (selection) {
+                const { index, length } = lastInsertedTemplate.current;
 
-        switch (e.key) {
-            case 'ArrowDown':
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedIndex(prev =>
-                    Math.min(prev + 1, filteredSuggestions.length - 1)
-                );
-                break;
+                // Check if cursor is right after a template
+                if (selection.index === index + length) {
+                    // Remove formatting from the template
+                    quillInstance.formatText(index, length, {
+                        'color': false,
+                        'background': false,
+                        'font-weight': false
+                    });
 
-            case 'ArrowUp':
-                e.preventDefault();
-                e.stopPropagation();
-                setSelectedIndex(prev => Math.max(prev - 1, 0));
-                break;
-
-            case 'Enter':
-                e.preventDefault();
-                e.stopPropagation();
-                if (filteredSuggestions.length > 0) {
-                    insertSuggestion(filteredSuggestions[selectedIndex]);
+                    // Clear the reference since we've handled this template
+                    lastInsertedTemplate.current = null;
                 }
-                break;
+            }
+        }
 
-            case 'Escape':
-                e.preventDefault();
-                e.stopPropagation();
-                setShowSuggestions(false);
-                break;
+        if (showSuggestions) {
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedIndex(prev =>
+                        Math.min(prev + 1, filteredSuggestions.length - 1)
+                    );
+                    break;
 
-            case 'Tab':
-                if (showSuggestions) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setSelectedIndex(prev => Math.max(prev - 1, 0));
+                    break;
+
+                case 'Enter':
                     e.preventDefault();
                     e.stopPropagation();
                     if (filteredSuggestions.length > 0) {
                         insertSuggestion(filteredSuggestions[selectedIndex]);
                     }
-                }
-                break;
+                    break;
+
+                case 'Escape':
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setShowSuggestions(false);
+                    break;
+
+                case 'Tab':
+                    if (showSuggestions) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (filteredSuggestions.length > 0) {
+                            insertSuggestion(filteredSuggestions[selectedIndex]);
+                        }
+                    }
+                    break;
+            }
         }
-    }, [showSuggestions, filteredSuggestions, selectedIndex, insertSuggestion]);
+    }, [showSuggestions, filteredSuggestions, selectedIndex, insertSuggestion, quillInstance]);
 
     // Check for the '{{' pattern in text and show suggestions
     const checkForTriggerPattern = useCallback(() => {
@@ -185,19 +200,19 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         };
     }, [quillInstance, checkForTriggerPattern]);
 
-    // Add keyboard event listener
+    // Add keyboard event listener - modified to always listen for keydown to detect space
     useEffect(() => {
-        if (showSuggestions) {
-            document.addEventListener('keydown', handleKeyDown, true);
+        // Always listen for keydown to detect space after template insertion
+        document.addEventListener('keydown', handleKeyDown, true);
 
-            // Focus trap - prevent focus from leaving the editor while suggestions are shown
+        // Add the focus trap only when suggestions are shown
+        if (showSuggestions) {
             const preventFocusChange = (e: FocusEvent) => {
                 if (quillInstance && quillInstance.root !== e.target) {
                     e.preventDefault();
                     quillInstance.focus();
                 }
             };
-
             document.addEventListener('focusin', preventFocusChange, true);
 
             return () => {
@@ -205,6 +220,10 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
                 document.removeEventListener('focusin', preventFocusChange, true);
             };
         }
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, true);
+        };
     }, [handleKeyDown, showSuggestions, quillInstance]);
 
     // Define selectSuggestion last since it depends on insertSuggestion
