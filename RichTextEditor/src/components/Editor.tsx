@@ -96,7 +96,7 @@ const Editor: React.FC<EditorProps> = ({ onFocusChange }) => {
           }`}
           onClick={handleEditorClick}
         >
-          <div ref={quillRef} className="min-h-[300px]"></div>
+          <div ref={quillRef} className="min-h-[300px] max-h-[400px] overflow-y-auto"></div>
 
           {/* Pass the editor container ref to ImprovedSuggestions */}
           <ImprovedSuggestions
