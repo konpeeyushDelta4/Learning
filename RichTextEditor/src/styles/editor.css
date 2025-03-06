@@ -1,0 +1,15 @@
+/* Styles for the editor */
+
+/* Template variable styling */
+.template-variable {
+    background-color: #dbeafe;
+    color: #3b82f6;
+    font-weight: bold;
+    border-radius: 3px;
+    padding: 0 2px;
+}
+
+/* Make sure the template variable styling is visible in the editor */
+.ql-editor .template-variable {
+    display: inline-block;
+}

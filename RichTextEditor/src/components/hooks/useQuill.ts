@@ -23,7 +23,8 @@ const useQuill = () => {
                     // Prevent any automatic content restoration
                     userOnly: true
                 }
-            }
+            },
+            formats: ['template-variable'] // Allow our custom format
         });
 
         // Set default font size for the entire editor

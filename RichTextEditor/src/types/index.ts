@@ -34,6 +34,17 @@ interface Position {
     left: number;
 }
 
+interface ImprovedSuggestionsProps {
+    isVisible: boolean;
+    position: { top: number; left: number };
+    filteredSuggestions: SuggestionProps[];
+    selectedIndex: number;
+    setSelectedIndex: (index: number) => void;
+    selectSuggestion: (suggestion: SuggestionProps) => void;
+    editorRef?: React.RefObject<HTMLDivElement | null>;
+
+}
+
 
 
 export type {
@@ -41,5 +52,6 @@ export type {
     SuggestionsProps,
     TemplateSuggestion,
     UseRegexProps,
-    Position
+    Position,
+    ImprovedSuggestionsProps
 }
