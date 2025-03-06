@@ -9,12 +9,6 @@ interface LastInsertedTemplate {
     length: number;
 }
 
-// Interface to track template positions
-interface TemplatePosition {
-    start: number;
-    end: number;
-}
-
 const useRegex = ({ quillInstance }: UseRegexProps) => {
     const [showSuggestions, setShowSuggestions] = useState(false);
     const [position, setPosition] = useState<Position>({ top: 0, left: 0 });
@@ -24,9 +18,6 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
 
     // Ref to track the last inserted template
     const lastInsertedTemplate = useRef<LastInsertedTemplate | null>(null);
-
-    // Ref to track all template positions in the document
-    const templatePositions = useRef<{ [key: number]: TemplatePosition }>({});
 
     // Add ref for suggestions container
     const suggestionsRef = useRef<HTMLDivElement | null>(null);
@@ -45,63 +36,6 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
             // Use basic scrollIntoView for simplicity
             selectedItem.scrollIntoView({ block: 'nearest' });
         }
-    }, []);
-
-    /**
-     * Scan the document for all templates and store their positions
-     */
-    const scanForTemplates = useCallback(() => {
-        if (!quillInstance) return;
-
-        const text = quillInstance.getText();
-        const positions: { [key: number]: TemplatePosition } = {};
-
-        let startPos = -1;
-        let openBrackets = 0;
-
-        // Scan through the text character by character
-        for (let i = 0; i < text.length - 1; i++) {
-            // Check for opening brackets
-            if (text[i] === '{' && text[i + 1] === '{') {
-                if (openBrackets === 0) {
-                    startPos = i;
-                }
-                openBrackets++;
-                i++; // Skip the next character since we've already checked it
-            }
-            // Check for closing brackets
-            else if (text[i] === '}' && text[i + 1] === '}') {
-                openBrackets--;
-                if (openBrackets === 0 && startPos !== -1) {
-                    // We've found a complete template
-                    const endPos = i + 2; // Include both closing brackets
-
-                    // Store the template position with its content as the key
-                    for (let pos = startPos; pos < endPos; pos++) {
-                        positions[pos] = { start: startPos, end: endPos };
-                    }
-
-                    startPos = -1;
-                }
-                i++; // Skip the next character
-            }
-        }
-
-        templatePositions.current = positions;
-    }, [quillInstance]);
-
-    /**
-     * Check if the cursor is inside a template
-     */
-    const isInsideTemplate = useCallback((cursorPos: number) => {
-        return templatePositions.current[cursorPos] !== undefined;
-    }, []);
-
-    /**
-     * Get the template boundaries at the cursor position
-     */
-    const getTemplateBoundaries = useCallback((cursorPos: number) => {
-        return templatePositions.current[cursorPos];
     }, []);
 
     // Check for the '{{' pattern in text and show suggestions
@@ -162,10 +96,7 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
                 setTriggerIndex(null);
             }
         }
-
-        // Scan for templates whenever we check for trigger patterns
-        scanForTemplates();
-    }, [quillInstance, position, showSuggestions, selectedIndex, scanForTemplates]);
+    }, [quillInstance, position, showSuggestions, selectedIndex]);
 
     // Now define insertSuggestion after checkForTriggerPattern
     const insertSuggestion = useCallback((suggestion: TemplateSuggestion) => {
@@ -230,8 +161,6 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
 
         const handleTextChange = () => {
             throttledCheckForTriggerPattern();
-            // Also scan for templates on text change
-            scanForTemplates();
         };
 
         quillInstance.on('text-change', handleTextChange);
@@ -239,7 +168,7 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         return () => {
             quillInstance.off('text-change', handleTextChange);
         };
-    }, [quillInstance, throttledCheckForTriggerPattern, scanForTemplates]);
+    }, [quillInstance, throttledCheckForTriggerPattern]);
 
     // Monitor selection changes
     useEffect(() => {
@@ -256,46 +185,8 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         };
     }, [quillInstance, throttledCheckForTriggerPattern]);
 
-    // Handle backspace key press to delete entire templates
-    const handleBackspace = useCallback((e: KeyboardEvent) => {
-        if (!quillInstance || e.key !== 'Backspace') return;
-
-        const selection = quillInstance.getSelection();
-        if (!selection) return;
-
-        const cursorPos = selection.index;
-
-        // Check if we're inside a template
-        if (isInsideTemplate(cursorPos)) {
-            // Get the template boundaries
-            const boundaries = getTemplateBoundaries(cursorPos);
-            if (!boundaries) return;
-
-            // Prevent default backspace behavior
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Delete the entire template
-            quillInstance.deleteText(boundaries.start, boundaries.end - boundaries.start);
-
-            // Position cursor at the start position
-            quillInstance.setSelection(boundaries.start, 0);
-
-            // Rescan for templates after deletion
-            setTimeout(() => {
-                scanForTemplates();
-            }, 10);
-        }
-    }, [quillInstance, isInsideTemplate, getTemplateBoundaries, scanForTemplates]);
-
     // Modify the keyboard handler to preserve cursor position during navigation
     const handleKeyDown = useCallback((e: KeyboardEvent) => {
-        // Handle backspace for template deletion
-        if (e.key === 'Backspace') {
-            handleBackspace(e);
-            return;
-        }
-
         // Handle space key for resetting format
         if (e.key === ' ' && quillInstance && lastInsertedTemplate.current) {
             // No need to reset the format, usePaint will handle it
@@ -375,13 +266,10 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
                     break;
             }
         }
-    }, [showSuggestions, filteredSuggestions, selectedIndex, insertSuggestion, quillInstance, scrollSelectedIntoView, triggerIndex, handleBackspace]);
+    }, [showSuggestions, filteredSuggestions, selectedIndex, insertSuggestion, quillInstance, scrollSelectedIntoView, triggerIndex]);
 
     // Add keyboard event listener - modified to always listen for keydown to detect space
     useEffect(() => {
-        // Initial scan for templates
-        scanForTemplates();
-
         // Always listen for keydown to detect space after template insertion and handle navigation
         document.addEventListener('keydown', handleKeyDown, true);
 
@@ -409,7 +297,7 @@ const useRegex = ({ quillInstance }: UseRegexProps) => {
         return () => {
             document.removeEventListener('keydown', handleKeyDown, true);
         };
-    }, [handleKeyDown, showSuggestions, quillInstance, filteredSuggestions, selectedIndex, scanForTemplates]);
+    }, [handleKeyDown, showSuggestions, quillInstance, filteredSuggestions, selectedIndex]);
 
     // Define selectSuggestion last since it depends on insertSuggestion
     const selectSuggestion = useCallback((suggestion: TemplateSuggestion) => {

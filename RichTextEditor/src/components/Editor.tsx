@@ -6,7 +6,11 @@ import "../styles/editor.css";
 import "../styles/suggestions.css";
 import { ImprovedSuggestions } from "../components";
 
-const Editor = () => {
+interface EditorProps {
+  onFocusChange?: (isFocused: boolean) => void;
+}
+
+const Editor: React.FC<EditorProps> = ({ onFocusChange }) => {
   const { quillRef, quillInstance } = useQuill();
   const [isEditorFocused, setIsEditorFocused] = useState(false);
 
@@ -37,8 +41,15 @@ const Editor = () => {
 
   // Handle focus and blur events to control animation
   useEffect(() => {
-    const handleFocus = () => setIsEditorFocused(true);
-    const handleBlur = () => setIsEditorFocused(false);
+    const handleFocus = () => {
+      setIsEditorFocused(true);
+      if (onFocusChange) onFocusChange(true);
+    };
+
+    const handleBlur = () => {
+      setIsEditorFocused(false);
+      if (onFocusChange) onFocusChange(false);
+    };
 
     // Add event listeners to detect focus/blur on the editor
     const editorElement = quillRef.current?.querySelector(".ql-editor");
@@ -53,7 +64,7 @@ const Editor = () => {
         editorElement.removeEventListener("blur", handleBlur);
       }
     };
-  });
+  }, [onFocusChange, quillRef]);
 
   return (
     <div className="w-full max-w-4xl mx-auto p-6 relative overflow-hidden">
@@ -71,7 +82,7 @@ const Editor = () => {
       <div className="glassmorphism-container relative z-10 p-4 rounded-xl shadow-xl">
         {/* Header */}
         <div className="mb-5 relative z-10">
-          <h2 className="text-xl font-bold text-gray-800">Dynamic Prompt Editor</h2>
+          {/* <h2 className="text-xl font-bold text-gray-800">Dynamic Prompt Editor</h2> */}
           <p className="text-sm text-gray-600">
             Type your prompt in <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-orange-50 text-orange-600 font-medium border border-orange-200">{`{{`}</span> to get started.
           </p>

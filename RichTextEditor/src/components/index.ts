@@ -1,10 +1,12 @@
 import Editor from "./Editor";
 import Suggestions from "./Suggestions";
 import ImprovedSuggestions from "./ImprovedSuggestions";
+import Widget from "./Widget";
 
 
-export{
+export {
     Editor,
     Suggestions,
-    ImprovedSuggestions
+    ImprovedSuggestions,
+    Widget
 }

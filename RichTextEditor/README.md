@@ -1,54 +1,121 @@
-# React + TypeScript + Vite
+# Dynamic Template Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern rich text editor with template suggestions and intelligent highlighting. This editor allows users to create and edit content with dynamic template variables that are highlighted and suggested as you type.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Rich Text Editing**: Full-featured text editor based on Quill.js
+- **Template Suggestions**: Type `{{` to trigger intelligent template suggestions
+- **Syntax Highlighting**: Automatic highlighting of template variables
+- **Keyboard Navigation**: Navigate and select suggestions using keyboard shortcuts
+- **Visual Feedback**: Beautiful animations and visual cues for better UX
+- **Responsive Design**: Works on all screen sizes
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Node.js (v14 or later)
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/yourusername/RichTextEditor.git
+   cd RichTextEditor
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. Start the development server:
+
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. Open your browser and navigate to `http://localhost:5173`
+
+## Core Hooks
+
+The editor is built using several custom React hooks:
+
+### useQuill
+
+Initializes and manages the Quill editor instance.
+
+```typescript
+const { quillRef, quillInstance } = useQuill();
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- `quillRef`: React ref to attach to the editor container
+- `quillInstance`: The Quill editor instance
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### useRegex
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Handles template pattern detection and suggestion management.
+
+```typescript
+const { showSuggestions, position, filteredSuggestions, selectedIndex, setSelectedIndex, selectSuggestion } = useRegex({ quillInstance });
 ```
+
+- `showSuggestions`: Boolean to control suggestion visibility
+- `position`: Coordinates for positioning the suggestions dropdown
+- `filteredSuggestions`: Filtered list of suggestions based on user input
+- `selectedIndex`: Currently selected suggestion index
+- `setSelectedIndex`: Function to update the selected index
+- `selectSuggestion`: Function to insert the selected suggestion
+
+### usePaint
+
+Handles the highlighting of template variables in the editor.
+
+```typescript
+usePaint({ quillInstance });
+```
+
+This hook scans the editor content and applies custom formatting to text within `{{...}}` delimiters.
+
+## Components
+
+### Editor
+
+The main editor component that integrates all hooks and manages the editor state.
+
+### ImprovedSuggestions
+
+Displays the suggestions dropdown with proper positioning and keyboard navigation.
+
+### Widget
+
+Shows keyboard shortcuts and navigation hints when the editor is focused.
+
+## Keyboard Shortcuts
+
+| Key(s)    | Action                            |
+| --------- | --------------------------------- |
+| `{{`      | Trigger template suggestions      |
+| ↑/↓       | Navigate through suggestions      |
+| Enter/Tab | Select the highlighted suggestion |
+| Esc       | Close suggestions                 |
+
+## Customization
+
+You can customize the available templates by modifying the `defaultSuggestions` array in `src/utils/constants.ts`.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
