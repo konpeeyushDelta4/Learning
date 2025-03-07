@@ -1,92 +1,47 @@
-/* Base Editor styling */
+@import 'quill/dist/quill.snow.css';
+@import 'quill/dist/quill.bubble.css';
+
 .quill-ui-editor {
-    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    background: #fff;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-.quill-ui-editor.theme-snow .ql-toolbar {
-    border-bottom: 1px solid #ddd;
-    padding: 8px;
-}
-
-.quill-ui-editor.theme-snow .ql-container {
-    border: none;
-}
-
-.quill-ui-editor .ql-editor {
+.quill-ui-editor .editor-content {
+    flex: 1;
     min-height: 150px;
-    line-height: 1.6;
-    font-size: 16px;
-    outline: none;
-    overflow-y: auto;
-    padding: 12px 15px;
 }
 
-/* Customized scrollbar */
-.quill-ui-editor .ql-editor::-webkit-scrollbar {
-    width: 8px;
-}
-
-.quill-ui-editor .ql-editor::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.quill-ui-editor .ql-editor::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    border: 2px solid transparent;
-}
-
-.quill-ui-editor .ql-editor::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(0, 0, 0, 0.3);
-}
-
-/* Focus state */
-.quill-ui-editor:focus-within {
-    border-color: #66afe9;
-    box-shadow: 0 0 0 2px rgba(102, 175, 233, 0.25);
-}
-
-/* Read-only state */
-.quill-ui-editor.read-only .ql-editor {
-    background-color: #f9f9f9;
-}
-
-.quill-ui-editor.read-only .ql-toolbar {
+/* Hide duplicate toolbars */
+.quill-ui-editor .ql-toolbar+.ql-toolbar {
     display: none;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .quill-ui-editor .ql-toolbar button {
-        padding: 3px 5px;
-    }
+/* Ensure placeholder is properly positioned */
+.quill-ui-editor .ql-editor.ql-blank::before {
+    font-style: italic;
+    position: absolute;
+    left: 15px;
+    pointer-events: none;
 }
 
-/* Support for varying heights */
-.quill-ui-editor.auto-height .ql-container {
-    height: auto;
+/* Bubble theme styles */
+.theme-bubble .editor-content {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 12px;
+    transition: border-color 0.2s ease;
 }
 
-/* Utility classes for toolbar positioning */
-.quill-ui-editor.toolbar-bottom {
-    flex-direction: column-reverse;
+.theme-bubble .editor-content:hover {
+    border-color: #999;
 }
 
-.quill-ui-editor.toolbar-bottom .ql-toolbar {
-    border-top: 1px solid #ddd;
-    border-bottom: none;
+.theme-bubble .editor-content:focus-within {
+    border-color: #06c;
+    box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.1);
 }
 
-/* Sticky toolbar support */
-.quill-ui-editor.toolbar-sticky .ql-toolbar {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    background-color: white;
+/* Adjust bubble toolbar position */
+.theme-bubble .ql-bubble .ql-tooltip {
+    z-index: 1000;
 }

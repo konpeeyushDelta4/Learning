@@ -1,66 +1,37 @@
-import { CSSProperties, ReactNode } from 'react';
-import Quill from 'quill';
+import Quill from "quill";
 
-/**
- * Base Editor Props interface
- */
-export interface EditorProps {
-    // Instance
-    id?: string;
-    className?: string;
-    style?: CSSProperties;
-    ref?: React.Ref<HTMLDivElement>;
+export interface UseQuillProps {
+    // Theme options
+    theme?: 'snow' | 'bubble';
 
-    // Content
+    // Content options
+    placeholder?: string;
     value?: string;
     defaultValue?: string;
-    placeholder?: string;
     readOnly?: boolean;
 
-    // Dimensions
-    height?: string | number;
-    width?: string | number;
-    maxHeight?: string | number;
-    minHeight?: string | number;
+    // Style options
+    fontSize?: string;
+    lineHeight?: string;
+    width?: string;
+    height?: string;
 
-    // Toolbar and Modules
-    toolbar?: boolean | string[] | { container: string | string[] | object };
-    modules?: Record<string, any>;
+    // Toolbar and formatting options
+    toolbar?: boolean | string[][];
     formats?: string[];
-    theme?: 'snow' | 'bubble' | null;
 
-    // Events
-    onChange?: (html: string, delta: any, source: string, editor: Quill) => void;
-    onChangeSelection?: (range: any, source: string, editor: Quill) => void;
-    onFocus?: (editor: Quill) => void;
-    onBlur?: (editor: Quill) => void;
-    onReady?: (editor: Quill) => void;
-
-    // Children
-    children?: ReactNode;
+    // Event handlers
+    onChange?: (content: string) => void;
+    onFocus?: () => void;
+    onBlur?: () => void;
 }
 
-/**
- * Toolbar Props interface
- */
-export interface ToolbarProps {
-    id?: string;
-    className?: string;
-    style?: CSSProperties;
-    options?: string[] | { container: string | string[] | object };
-    position?: 'top' | 'bottom';
-    sticky?: boolean;
-    disabled?: boolean;
+export interface UseQuillReturn {
+    quillRef: React.RefObject<HTMLDivElement>;
+    quillInstance: Quill | null;
+    editorState: string;
+    setEditorState: (content: string) => void;
+    clearContent: () => void;
+    focus: () => void;
+    blur: () => void;
 }
-
-/**
- * ContentBlock Props interface
- */
-export interface ContentBlockProps {
-    id?: string;
-    className?: string;
-    style?: CSSProperties;
-    children?: ReactNode;
-    contentEditable?: boolean;
-    dangerouslySetInnerHTML?: { __html: string };
-} 

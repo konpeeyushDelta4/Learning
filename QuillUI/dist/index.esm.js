@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef, useState, useImperativeHandle, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Quill from 'quill';
 
 /******************************************************************************
@@ -29,180 +29,148 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
-function __rest(s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-}
-
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
 };
 
-/**
- * A customizable rich text editor component based on Quill.js
- */
-var Editor = forwardRef(function (props, ref) {
-    var 
-    // Instance props
-    id = props.id, _a = props.className, className = _a === void 0 ? "" : _a, style = props.style, 
-    // Content props
-    value = props.value, defaultValue = props.defaultValue, _b = props.placeholder, placeholder = _b === void 0 ? "Write something..." : _b, _c = props.readOnly, readOnly = _c === void 0 ? false : _c, 
-    // Dimension props
-    _d = props.height, 
-    // Dimension props
-    height = _d === void 0 ? "auto" : _d, _e = props.width, width = _e === void 0 ? "100%" : _e, maxHeight = props.maxHeight, _f = props.minHeight, minHeight = _f === void 0 ? "150px" : _f, 
-    // Toolbar and module props
-    _g = props.toolbar, 
-    // Toolbar and module props
-    toolbar = _g === void 0 ? true : _g, _h = props.modules, modules = _h === void 0 ? {} : _h, formats = props.formats, _j = props.theme, theme = _j === void 0 ? "snow" : _j, 
-    // Event handlers
-    onChange = props.onChange, onChangeSelection = props.onChangeSelection, onFocus = props.onFocus, onBlur = props.onBlur, onReady = props.onReady, 
-    // Children
-    children = props.children, rest = __rest(props, ["id", "className", "style", "value", "defaultValue", "placeholder", "readOnly", "height", "width", "maxHeight", "minHeight", "toolbar", "modules", "formats", "theme", "onChange", "onChangeSelection", "onFocus", "onBlur", "onReady", "children"]);
-    // Refs
-    var editorRef = useRef(null);
-    var quillInstanceRef = useRef(null);
-    // State
-    var _k = useState(false); _k[0]; var setEditorReady = _k[1];
-    // Forward the ref to the parent component if provided
-    useImperativeHandle(ref, function () { return editorRef.current; });
+var defaultToolbarOptions = [
+    ['bold', 'italic', 'underline'],
+    ['blockquote', 'code-block'],
+    [{ 'header': 1 }, { 'header': 2 }],
+    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+    [{ 'align': [] }],
+    ['clean']
+];
+var useQuill = function (_a) {
+    var _b = _a === void 0 ? {} : _a, _c = _b.theme, theme = _c === void 0 ? 'snow' : _c, _d = _b.placeholder, placeholder = _d === void 0 ? 'Write something...' : _d, value = _b.value, _e = _b.defaultValue, defaultValue = _e === void 0 ? '' : _e, _f = _b.readOnly, readOnly = _f === void 0 ? false : _f, _g = _b.fontSize, fontSize = _g === void 0 ? '1rem' : _g, _h = _b.lineHeight, lineHeight = _h === void 0 ? '1.5' : _h, _j = _b.width, width = _j === void 0 ? '100%' : _j, _k = _b.height, height = _k === void 0 ? 'auto' : _k, _l = _b.toolbar, toolbar = _l === void 0 ? true : _l, _m = _b.formats, formats = _m === void 0 ? [] : _m, onChange = _b.onChange, onFocus = _b.onFocus, onBlur = _b.onBlur;
+    var containerRef = useRef(null);
+    var _o = useState(null), quillInstance = _o[0], setQuillInstance = _o[1];
+    var _p = useState(defaultValue), editorState = _p[0], setEditorState = _p[1];
     // Initialize Quill
     useEffect(function () {
-        if (!editorRef.current || quillInstanceRef.current)
+        if (!containerRef.current || quillInstance)
             return;
-        // Configure toolbar
-        var toolbarOptions = toolbar === true
-            ? [
-                ["bold", "italic", "underline", "strike"],
-                ["blockquote", "code-block"],
-                [{ header: 1 }, { header: 2 }],
-                [{ list: "ordered" }, { list: "bullet" }],
-                [{ indent: "-1" }, { indent: "+1" }],
-                [{ direction: "rtl" }],
-                [{ size: ["small", false, "large", "huge"] }],
-                [{ header: [1, 2, 3, 4, 5, 6, false] }],
-                [{ color: [] }, { background: [] }],
-                [{ font: [] }],
-                [{ align: [] }],
-                ["clean"],
-            ]
-            : toolbar;
-        // Configure modules
-        var quillModules = __assign({ toolbar: toolbarOptions }, modules);
-        // Initialize Quill
-        var quill = new Quill(editorRef.current, {
-            modules: quillModules,
+        // Clear any existing content and create editor container
+        containerRef.current.innerHTML = '<div class="editor-content"></div>';
+        var editorElement = containerRef.current.querySelector('.editor-content');
+        // Create Quill instance
+        var quill = new Quill(editorElement, {
+            theme: theme,
             placeholder: placeholder,
             readOnly: readOnly,
-            theme: theme === null ? undefined : theme,
-            formats: formats,
+            modules: __assign(__assign({}, (toolbar !== false && {
+                toolbar: toolbar === true ? defaultToolbarOptions : toolbar
+            })), { history: {
+                    userOnly: true
+                } }),
+            formats: formats.length > 0 ? formats : undefined
         });
+        // Apply styles
+        quill.root.style.fontSize = fontSize;
+        quill.root.style.lineHeight = lineHeight;
+        quill.root.style.width = width;
+        quill.root.style.height = height;
         // Set initial content
-        if (defaultValue && !value) {
-            quill.clipboard.dangerouslyPasteHTML(defaultValue);
-        }
-        else if (value) {
+        if (value !== undefined) {
             quill.clipboard.dangerouslyPasteHTML(value);
         }
-        // Store handlers for cleanup
-        var textChangeHandler;
-        var selectionChangeHandler;
-        // Set up event handlers
-        if (onChange) {
-            textChangeHandler = function (delta, oldDelta, source) {
-                onChange(quill.root.innerHTML, delta, source, quill);
-            };
-            quill.on("text-change", textChangeHandler);
+        else if (defaultValue) {
+            quill.clipboard.dangerouslyPasteHTML(defaultValue);
         }
-        if (onChangeSelection) {
-            selectionChangeHandler = function (range, oldRange, source) {
-                onChangeSelection(range, source, quill);
-            };
-            quill.on("selection-change", selectionChangeHandler);
-        }
-        if (onFocus) {
-            quill.root.addEventListener("focus", function () { return onFocus(quill); });
-        }
-        if (onBlur) {
-            quill.root.addEventListener("blur", function () { return onBlur(quill); });
-        }
-        // Store the Quill instance
-        quillInstanceRef.current = quill;
-        setEditorReady(true);
-        // Call onReady with the Quill instance
-        if (onReady) {
-            onReady(quill);
-        }
+        // Save instance
+        setQuillInstance(quill);
+        // Listen for content changes
+        var handleTextChange = function () {
+            setEditorState(quill.root.innerHTML);
+            onChange === null || onChange === void 0 ? void 0 : onChange(quill.root.innerHTML);
+        };
+        quill.on('text-change', handleTextChange);
+        // Handle focus/blur
+        var handleFocus = function () { return onFocus === null || onFocus === void 0 ? void 0 : onFocus(); };
+        var handleBlur = function () { return onBlur === null || onBlur === void 0 ? void 0 : onBlur(); };
+        quill.root.addEventListener('focus', handleFocus);
+        quill.root.addEventListener('blur', handleBlur);
         // Clean up
         return function () {
-            if (onChange && textChangeHandler) {
-                quill.off("text-change", textChangeHandler);
+            quill.off('text-change', handleTextChange);
+            quill.root.removeEventListener('focus', handleFocus);
+            quill.root.removeEventListener('blur', handleBlur);
+            quill.disable();
+            if (containerRef.current) {
+                containerRef.current.innerHTML = '';
             }
-            if (onChangeSelection && selectionChangeHandler) {
-                quill.off("selection-change", selectionChangeHandler);
-            }
-            if (onFocus) {
-                quill.root.removeEventListener("focus", function () { return onFocus(quill); });
-            }
-            if (onBlur) {
-                quill.root.removeEventListener("blur", function () { return onBlur(quill); });
-            }
-            // quillInstanceRef.current = null;
+            setQuillInstance(null);
         };
-    }, [defaultValue, onChange, onChangeSelection, onFocus, onBlur, onReady, placeholder, readOnly, theme, formats, modules]);
-    // Update content when value changes (controlled component)
+    }, []);
+    // Handle prop changes after initial mount
     useEffect(function () {
-        if (quillInstanceRef.current && value !== undefined && value !== quillInstanceRef.current.root.innerHTML) {
-            quillInstanceRef.current.clipboard.dangerouslyPasteHTML(value);
+        if (!quillInstance)
+            return;
+        // Update styles
+        quillInstance.root.style.fontSize = fontSize;
+        quillInstance.root.style.lineHeight = lineHeight;
+        quillInstance.root.style.width = width;
+        quillInstance.root.style.height = height;
+        // Update readOnly state
+        quillInstance.enable(!readOnly);
+        // Reinitialize Quill if toolbar changes
+        if (toolbar !== undefined && containerRef.current) {
+            var content = quillInstance.root.innerHTML;
+            quillInstance.disable();
+            containerRef.current.innerHTML = '<div class="editor-content"></div>';
+            var editorElement = containerRef.current.querySelector('.editor-content');
+            var newQuill = new Quill(editorElement, {
+                theme: theme,
+                placeholder: placeholder,
+                readOnly: readOnly,
+                modules: __assign(__assign({}, (toolbar !== false && {
+                    toolbar: toolbar === true ? defaultToolbarOptions : toolbar
+                })), { history: {
+                        userOnly: true
+                    } }),
+                formats: formats.length > 0 ? formats : undefined
+            });
+            newQuill.clipboard.dangerouslyPasteHTML(content);
+            setQuillInstance(newQuill);
+        }
+    }, [theme, fontSize, lineHeight, width, height, readOnly, toolbar]);
+    // Handle value changes separately
+    useEffect(function () {
+        if (!quillInstance || value === undefined)
+            return;
+        if (value !== quillInstance.root.innerHTML) {
+            quillInstance.clipboard.dangerouslyPasteHTML(value);
         }
     }, [value]);
-    // Determine editor className
-    var editorClassName = "quill-ui-editor ".concat(theme ? "theme-".concat(theme) : "", " ").concat(readOnly ? "read-only" : "", " ").concat(className);
-    return (React.createElement("div", __assign({ id: id, className: editorClassName, style: __assign({ height: height, width: width, maxHeight: maxHeight, minHeight: minHeight }, style) }, rest),
-        React.createElement("div", { ref: editorRef }),
-        children));
-});
-Editor.displayName = "Editor";
+    // Utility functions
+    var clearContent = function () {
+        if (quillInstance) {
+            quillInstance.setText('');
+        }
+    };
+    var focus = function () {
+        quillInstance === null || quillInstance === void 0 ? void 0 : quillInstance.focus();
+    };
+    var blur = function () {
+        if (quillInstance) {
+            quillInstance.root.blur();
+        }
+    };
+    return {
+        quillRef: containerRef,
+        quillInstance: quillInstance,
+        editorState: editorState,
+        setEditorState: function (content) {
+            if (quillInstance) {
+                quillInstance.clipboard.dangerouslyPasteHTML(content);
+            }
+        },
+        clearContent: clearContent,
+        focus: focus,
+        blur: blur
+    };
+};
 
-/**
- * A customizable toolbar component for the Quill editor
- */
-var Toolbar = forwardRef(function (props, ref) {
-    var id = props.id, _a = props.className, className = _a === void 0 ? "" : _a, style = props.style; props.options; var _b = props.position, position = _b === void 0 ? "top" : _b, _c = props.sticky, sticky = _c === void 0 ? false : _c, _d = props.disabled, disabled = _d === void 0 ? false : _d, rest = __rest(props, ["id", "className", "style", "options", "position", "sticky", "disabled"]);
-    // Generate the toolbar ID
-    var toolbarId = id || "quill-ui-toolbar-".concat(Math.random().toString(36).substr(2, 9));
-    // Build className
-    var toolbarClassName = [
-        "quill-ui-toolbar",
-        position === "bottom" ? "quill-ui-toolbar-bottom" : "quill-ui-toolbar-top",
-        sticky ? "quill-ui-toolbar-sticky" : "",
-        disabled ? "quill-ui-toolbar-disabled" : "",
-        className,
-    ]
-        .filter(Boolean)
-        .join(" ");
-    return React.createElement("div", __assign({ id: toolbarId, ref: ref, className: toolbarClassName, style: style }, rest));
-});
-Toolbar.displayName = "Toolbar";
-
-/**
- * A component for displaying structured content within the editor
- */
-var ContentBlock = forwardRef(function (props, ref) {
-    var id = props.id, _a = props.className, className = _a === void 0 ? "" : _a, style = props.style, children = props.children, _b = props.contentEditable, contentEditable = _b === void 0 ? false : _b, dangerouslySetInnerHTML = props.dangerouslySetInnerHTML, rest = __rest(props, ["id", "className", "style", "children", "contentEditable", "dangerouslySetInnerHTML"]);
-    // Build className
-    var blockClassName = ["quill-ui-content-block", contentEditable ? "quill-ui-content-block-editable" : "", className].filter(Boolean).join(" ");
-    return (React.createElement("div", __assign({ id: id, ref: ref, className: blockClassName, style: style, contentEditable: contentEditable, dangerouslySetInnerHTML: dangerouslySetInnerHTML }, rest), !dangerouslySetInnerHTML && children));
-});
-ContentBlock.displayName = "ContentBlock";
-
-export { ContentBlock, Editor, Toolbar };
+export { useQuill };
 //# sourceMappingURL=index.esm.js.map
