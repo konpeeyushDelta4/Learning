@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, forwardRef } from 'react';
 import Quill from 'quill';
 
 /******************************************************************************
@@ -29,6 +29,18 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+}
+
 typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
     var e = new Error(message);
     return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
@@ -42,7 +54,7 @@ var defaultToolbarOptions = [
     [{ 'align': [] }],
     ['clean']
 ];
-var useQuill = function (_a) {
+var useDynamicTextEditor = function (_a) {
     var _b = _a === void 0 ? {} : _a, _c = _b.theme, theme = _c === void 0 ? 'snow' : _c, _d = _b.placeholder, placeholder = _d === void 0 ? 'Write something...' : _d, value = _b.value, _e = _b.defaultValue, defaultValue = _e === void 0 ? '' : _e, _f = _b.readOnly, readOnly = _f === void 0 ? false : _f, _g = _b.fontSize, fontSize = _g === void 0 ? '1rem' : _g, _h = _b.lineHeight, lineHeight = _h === void 0 ? '1.5' : _h, _j = _b.width, width = _j === void 0 ? '100%' : _j, _k = _b.height, height = _k === void 0 ? 'auto' : _k, _l = _b.toolbar, toolbar = _l === void 0 ? true : _l, _m = _b.formats, formats = _m === void 0 ? [] : _m, onChange = _b.onChange, onFocus = _b.onFocus, onBlur = _b.onBlur;
     var containerRef = useRef(null);
     var _o = useState(null), quillInstance = _o[0], setQuillInstance = _o[1];
@@ -172,5 +184,24 @@ var useQuill = function (_a) {
     };
 };
 
-export { useQuill };
+var DynamicTextEditorBase = function (_a, ref) {
+    var _b = _a.className, className = _b === void 0 ? "" : _b, _c = _a.containerClassName, containerClassName = _c === void 0 ? "" : _c, _d = _a.editorClassName, editorClassName = _d === void 0 ? "" : _d, props = __rest(_a, ["className", "containerClassName", "editorClassName"]);
+    var _e = useDynamicTextEditor(__assign({}, props)), quillRef = _e.quillRef, quillInstance = _e.quillInstance, editorState = _e.editorState, setEditorState = _e.setEditorState, clearContent = _e.clearContent, focus = _e.focus, blur = _e.blur;
+    // Merge refs if one is provided
+    React.useImperativeHandle(ref, function () { return ({
+        quillInstance: quillInstance,
+        editorState: editorState,
+        setEditorState: setEditorState,
+        clearContent: clearContent,
+        focus: focus,
+        blur: blur,
+        containerRef: quillRef.current,
+    }); });
+    return (React.createElement("div", { className: "dynamic-text-editor ".concat(className) },
+        React.createElement("div", { ref: quillRef, className: "dynamic-text-editor-container ".concat(containerClassName, " ").concat(editorClassName) })));
+};
+var DynamicTextEditor = forwardRef(DynamicTextEditorBase);
+DynamicTextEditor.displayName = "DynamicTextEditor";
+
+export { DynamicTextEditor, useDynamicTextEditor };
 //# sourceMappingURL=index.esm.js.map

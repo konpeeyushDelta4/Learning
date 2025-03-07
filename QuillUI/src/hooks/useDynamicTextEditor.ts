@@ -8,7 +8,7 @@ type ToolbarConfig = Array<
     | { [key: string]: any }[]
 >;
 
-type UseQuillProps = {
+type useDynamicTextEditorProps = {
     theme?: 'snow' | 'bubble';
     placeholder?: string;
     value?: string;
@@ -25,7 +25,7 @@ type UseQuillProps = {
     onBlur?: () => void;
 };
 
-type UseQuillReturn = {
+type useDynamicTextEditorReturn = {
     quillRef: React.RefObject<HTMLDivElement>;
     quillInstance: Quill | null;
     editorState: string;
@@ -44,7 +44,7 @@ const defaultToolbarOptions = [
     ['clean']
 ];
 
-export const useQuill = ({
+export const useDynamicTextEditor = ({
     theme = 'snow',
     placeholder = 'Write something...',
     value,
@@ -59,7 +59,7 @@ export const useQuill = ({
     onChange,
     onFocus,
     onBlur
-}: UseQuillProps = {}): UseQuillReturn => {
+}: useDynamicTextEditorProps = {}): useDynamicTextEditorReturn => {
     const containerRef = useRef<HTMLDivElement>(null);
     const [quillInstance, setQuillInstance] = useState<Quill | null>(null);
     const [editorState, setEditorState] = useState<string>(defaultValue);
@@ -212,5 +212,5 @@ export const useQuill = ({
     };
 };
 
-export type { UseQuillProps, UseQuillReturn };
-export default useQuill;
+export type { useDynamicTextEditorProps, useDynamicTextEditorReturn };
+export default useDynamicTextEditor;

@@ -1,2 +1,4 @@
-export { default as useQuill } from './hooks/useQuill';
-export type { UseQuillProps, UseQuillReturn } from './hooks/useQuill';
+export { useDynamicTextEditor } from './hooks/useDynamicTextEditor';
+export type { useDynamicTextEditorProps } from './hooks/useDynamicTextEditor';
+export { DynamicTextEditor } from './components/DynamicTextEditor';
+export type { DynamicTextEditorProps, DynamicTextEditorRef } from './components/DynamicTextEditor';
